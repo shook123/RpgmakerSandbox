@@ -119,7 +119,7 @@ class Projectile
   # * check if projectile hits an obstacle
   #--------------------------------------------------------------------------
   def stop_if_not_passable
-    ## BUGGED: STOPS IF HITS WATER
+    ## TODO: BUGGED: STOPS IF HITS WATER
     tempx = ($game_map.screen.pictures[@picture_index].x) / 32
     tempy = ($game_map.screen.pictures[@picture_index].y) / 32
     if $game_map.check_passage(tempx.round, tempy.round, 0x0200) || $game_map.check_passage(tempx.round, tempy.round, 0x0400)

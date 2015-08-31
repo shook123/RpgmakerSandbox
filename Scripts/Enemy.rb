@@ -13,12 +13,15 @@ class Enemy
   attr_reader   :initialized             # Turned on when enemy is started (alive or corpse)
   attr_reader   :index                   # own index in $Enemies array
   attr_reader   :active                  # if enemy is waiting to wake
+  attr_reader   :ai                      # ai variable - controls which page
+                                         # of the enemy event is running
 
   #--------------------------------------------------------------------------
   # * Initialize
   #--------------------------------------------------------------------------
   def initialize
     @id = 0 ## event id
+    @ai = 0
     @hp = 30
     @meele_damage = 30
     @range_damage = 10
@@ -29,6 +32,7 @@ class Enemy
     @active = false
     @damage_taken = 0
     @initialized = false ## this turns true when Enemy is alive or dead
+    
   end
   
   #--------------------------------------------------------------------------
@@ -44,6 +48,17 @@ class Enemy
   end
   
    #--------------------------------------------------------------------------
+   # * Upon map change refresh Enemy array
+   #--------------------------------------------------------------------------  
+   def map_change
+     i = 0
+     while i < $Enemies.length 
+       $Enemies[i] = Enemy.new
+       $Enemies[i].set_index(i)
+       i += 1
+    end
+   end
+   #--------------------------------------------------------------------------
    # * Get next free Enemy object (not alive or dead) in $Enemies array
    #--------------------------------------------------------------------------  
    def get_next_free_enemy(event_id)
@@ -52,6 +67,7 @@ class Enemy
        if !$Enemies[i].active
          $Enemies[i].set_id(event_id)
          $Enemies[i].set_active
+         $Enemies[i].set_map_id
          return i
          break
        end
@@ -59,6 +75,35 @@ class Enemy
     end
   end
   
+  #--------------------------------------------------------------------------
+  # * Get next free Enemy object (not alive or dead) in $Enemies array
+  #--------------------------------------------------------------------------  
+  def find_enemy_with_id(event_id)
+     i = 0
+     p event_id
+     while i < $Enemies.length
+       p $Enemies[i].id
+       if $Enemies[i].id == event_id then
+         return i
+       end
+       i += 1
+     end
+     return nil
+   end
+  
+   #--------------------------------------------------------------------------
+   # * refresh all "damage number" sprites (required after menu is shown)
+   #--------------------------------------------------------------------------  
+   def refresh_damage_numbers
+     i = 1
+     while i < $Enemies.length 
+       if $Enemies[i].initialized
+         $Enemies[i].init_damage_num
+       end
+       i += 1 
+     end
+   end
+   
    #--------------------------------------------------------------------------
    # * Check if at least one enemy is alive
    #--------------------------------------------------------------------------  
@@ -73,7 +118,7 @@ class Enemy
     end
     ### if no enemy is alive, return false
      return false
-  end
+   end
    
   #--------------------------------------------------------------------------
   # * Set this enemies event id
@@ -82,6 +127,12 @@ class Enemy
     @id = parameter
   end
   
+  #--------------------------------------------------------------------------
+  # * Set this enemies map id
+  #--------------------------------------------------------------------------  
+  def set_map_id
+    @map_id = $game_map.map_id
+  end  
   #--------------------------------------------------------------------------
   # * Set this enemies index in $Enemies array
   #--------------------------------------------------------------------------  
@@ -96,6 +147,12 @@ class Enemy
     @active = true
   end
   
+  #--------------------------------------------------------------------------
+  # * Set this enemies behaviour by changing the AI variable
+  #--------------------------------------------------------------------------  
+  def set_ai(parameter)
+    @ai = parameter
+  end
   #--------------------------------------------------------------------------
   # * Initialize damage number
   #--------------------------------------------------------------------------  

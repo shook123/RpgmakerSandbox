@@ -1,0 +1,1 @@
+rvpacker --action pack --project-type ace --project RpgmakerSandbox
